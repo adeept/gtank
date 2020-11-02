@@ -25,6 +25,7 @@ from rpi_ws281x import *
 import move
 import switch
 import numpy as np
+import RPIservo
 
 pid = PID.PID()
 pid.SetKp(0.5)
@@ -55,6 +56,11 @@ camera.resolution = (640, 480)
 camera.framerate = 20
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
+modeText = 'Select your mode, ARM or PT?'
+
+scGear = RPIservo.ServoCtrl()
+scGear.moveInit()
+
 def findLineCtrl(posInput, setCenter):#2
 	if posInput:
 		if posInput > (setCenter + findLineError):
@@ -62,7 +68,8 @@ def findLineCtrl(posInput, setCenter):#2
 			#turnRight
 			error = (posInput-320)/5
 			outv = int(round((pid.GenOut(error)),0))
-			move.move(80, 'no', 'right', 0.5)
+			scGear.moveAngle(0,-outv)
+			move.move(80, 'forward', 'no', 0.5)
 			time.sleep(0.2)
 			move.motorStop()
 			pass
@@ -71,7 +78,8 @@ def findLineCtrl(posInput, setCenter):#2
 			#turnLeft
 			error = (320-posInput)/5
 			outv = int(round((pid.GenOut(error)),0))
-			move.move(80, 'no', 'left', 0.5)
+			scGear.moveAngle(0,outv)
+			move.move(80, 'forward', 'no', 0.5)
 			time.sleep(0.2)
 			move.motorStop()
 			pass
@@ -221,6 +229,11 @@ class FPV:
 		camera.exposure_compensation = 0
 
 
+	def changeMode(self, textPut):
+		global modeText
+		modeText = textPut
+
+
 	def capture_thread(self,IPinver):
 		global frame_image, camera#Z
 		ap = argparse.ArgumentParser()			#OpenCV initialization
@@ -262,6 +275,7 @@ class FPV:
 				center = None
 				if len(cnts) > 0:
 					cv2.putText(frame_image,'Target Detected',(40,60), font, 0.5,(255,255,255),1,cv2.LINE_AA)
+
 					c = max(cnts, key=cv2.contourArea)
 					((x, y), radius) = cv2.minEnclosingCircle(c)
 					M = cv2.moments(c)
@@ -322,13 +336,6 @@ class FPV:
 				else:
 					cv2.putText(frame_image,'Target Detecting',(40,60), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 					move.motorStop()
-
-				for i in range(1, len(pts)):
-					if pts[i - 1] is None or pts[i] is None:
-						continue
-					thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-					cv2.line(frame_image, pts[i - 1], pts[i], (0, 0, 255), thickness)
-				####>>>OpenCV Ends<<<####
 				
 
 			if WatchDogMode:
@@ -382,6 +389,7 @@ class FPV:
 			if FindLineMode and not frameRender:#2
 				encoded, buffer = cv2.imencode('.jpg', frame_findline)
 			else:
+				cv2.putText(frame_image, modeText,(40,100), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 				encoded, buffer = cv2.imencode('.jpg', frame_image)
 			jpg_as_text = base64.b64encode(buffer)
 			footage_socket.send(jpg_as_text)

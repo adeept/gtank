@@ -17,22 +17,11 @@ try:
 except:
 	print('OLED disconnected\nOLED没有连接')
 
-# Box and text rendered in portrait mode
-# with canvas(device) as draw:
-# 	draw.text((0, 0), "WWW.CODELECTRON.COM", fill="white")
-# 	draw.text((0, 10), "WWW.CODELECTRON.COM", fill="white")
-# 	draw.text((0, 20), "WWW.CODELECTRON.COM", fill="white")
-# 	draw.text((0, 30), "WWW.CODELECTRON.COM", fill="white")
-# 	draw.text((0, 40), "WWW.CODELECTRON.COM", fill="white")
-# 	draw.text((0, 50), "WWW.CODELECTRON.COM", fill="white")
-# while 1:
-# 	time.sleep(1)
-
 text_1 = 'GEWBOT.COM'
-text_2 = 'IP:192.168.3.77'
-text_3 = 'AP MODE OFF'
-text_4 = 'PT MODE ON'
-text_5 = 'Functions OFF'
+text_2 = 'IP:CONNECTING'
+text_3 = '<ARM> OR <PT> MODE'
+text_4 = 'MPU6050 DETECTING'
+text_5 = 'FUNCTION OFF'
 text_6 = 'Message:None'
 
 class OLED_ctrl(threading.Thread):
@@ -46,13 +35,16 @@ class OLED_ctrl(threading.Thread):
 	def run(self):
 		while self.__running.isSet():
 			self.__flag.wait()	  # 为True时立即返回, 为False时阻塞直到内部的标识位为True后返回
-			with canvas(device) as draw:
-				draw.text((0, 0), text_1, fill="white")
-				draw.text((0, 10), text_2, fill="white")
-				draw.text((0, 20), text_3, fill="white")
-				draw.text((0, 30), text_4, fill="white")
-				draw.text((0, 40), text_5, fill="white")
-				draw.text((0, 50), text_6, fill="white")
+			try:
+				with canvas(device) as draw:
+					draw.text((0, 0), text_1, fill="white")
+					draw.text((0, 10), text_2, fill="white")
+					draw.text((0, 20), text_3, fill="white")
+					draw.text((0, 30), text_4, fill="white")
+					draw.text((0, 40), text_5, fill="white")
+					draw.text((0, 50), text_6, fill="white")
+			except:
+				pass
 			print('loop')
 			self.pause()
 
@@ -81,3 +73,11 @@ class OLED_ctrl(threading.Thread):
 		elif position == 6:
 			text_6 = text
 		self.resume()
+
+if __name__ == '__main__':
+	screen = OLED_ctrl()
+	screen.start()
+	screen.screen_show(1, 'GEWBOT.COM')
+	while 1:
+		time.sleep(10)
+		pass

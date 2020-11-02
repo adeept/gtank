@@ -10,10 +10,10 @@ import time
 Tr = 11
 Ec = 8
 
-# GPIO.setwarnings(False)
-# GPIO.setmode(GPIO.BCM)
-# GPIO.setup(Tr, GPIO.OUT,initial=GPIO.LOW)
-# GPIO.setup(Ec, GPIO.IN)
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(Tr, GPIO.OUT,initial=GPIO.LOW)
+GPIO.setup(Ec, GPIO.IN)
 
 
 def checkdist():       #Reading distance
