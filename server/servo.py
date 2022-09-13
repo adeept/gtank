@@ -241,5 +241,10 @@ def get_direction():
 
 
 if __name__ == '__main__':
-	radar_scan()
-	pass
+	while 1:
+		for i in range(0,100):
+			pwm.set_pwm(0, 0, (150+i))
+			time.sleep(0.01)
+		for i in range(0,100):
+			pwm.set_pwm(0, 0, (450-i))
+			time.sleep(0.01)
